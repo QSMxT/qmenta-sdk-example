@@ -1,10 +1,9 @@
 {
     "input": [
         {
-            "path": "T1.zip",
-            "modality": "T1"
+            "path": "qsm-menta.zip",
+            "tag": "GRE"
         }
     ],
-    "hist_start": 45.0,
-    "hist_end": 410.0
+    "qsm_iterations": 2
 }
