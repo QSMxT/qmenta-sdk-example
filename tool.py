@@ -25,7 +25,10 @@ def run(context):
     file_handler = context.get_files('input')[0]
     path = file_handler.download('/root/')  # Download and automatically unpack  
 
+    context.set_progress(message='This is container 20210818')
     context.set_progress(message='unpacking sub archives')
+    context.set_progress(message='path is '+str(path))
+
     zip_files = glob.glob(path+"/*.zip")
     context.set_progress(message='found ' + str(len(zip_files)) + ' archives')
     for file in zip_files:
