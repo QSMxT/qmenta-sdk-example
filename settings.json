@@ -11,7 +11,7 @@
         "type": "container",
         "id": "input",
         "title": "GRE image",
-        "file_filter": "qsm[2,2]<'T1', [], '\\.*'>",
+        "file_filter": "c_my_selection[1,*]<''>, any [mag, phs], '\\.*'>",
         "in_filter": [
             "mri_brain_data"
         ],

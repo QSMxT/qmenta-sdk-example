@@ -1,8 +1,12 @@
 {
     "input": [
         {
-            "path": "qsm-menta.zip",
-            "tag": "GRE"
+            "path": "mag.zip",
+            "tag": "mag"
+        },
+        {
+            "path": "phs.zip",
+            "tag": "phs"
         }
     ],
     "qsm_iterations": 2

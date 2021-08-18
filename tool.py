@@ -21,22 +21,26 @@ def run(context):
     # Get the analysis settings (histogram range of intensities)
     settings = analysis_data['settings']
 
-    # Get a T1 image from the input files
-    t1_file_handler = context.get_files('input')[0]
-    t1_path = t1_file_handler.download('/root/')  # Download and automatically unpack  
+    # Get mag image from the input files
+    mag_file_handler = context.get_files('input', tags = {'mag'})[0]
+    mag_path = mag_file_handler.download('/root/')  # Download and automatically unpack  
+    
+    # Get phs image from the input files
+    phs_file_handler = context.get_files('input', tags = {'phs'})[0]
+    phs_path = phs_file_handler.download('/root/')  # Download and automatically unpack  
 
-    context.set_progress(message='unpacking sub archives')
-    zip_files = glob.glob("/root/*.zip")
-    context.set_progress(message='found ' + str(len(zip_files)) + ' archives')
-    for file in zip_files:
-        context.set_progress(message='unpacking '+str(file))
-        call(["unzip", file])
+    # context.set_progress(message='unpacking sub archives')
+    # zip_files = glob.glob("/root/*.zip")
+    # context.set_progress(message='found ' + str(len(zip_files)) + ' archives')
+    # for file in zip_files:
+    #     context.set_progress(message='unpacking '+str(file))
+    #     call(["unzip", file])
 
     context.set_progress(message='Sorting DICOM data...')
     call([
     "python3",
     "/opt/QSMxT/run_0_dicomSort.py",
-    t1_path, 
+    path, 
     "/00_dicom"
     ])
 
