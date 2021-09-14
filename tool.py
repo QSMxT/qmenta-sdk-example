@@ -23,17 +23,24 @@ def run(context):
 
     # Get a T1 image from the input files
     file_handler = context.get_files('input')[0]
-    path = file_handler.download('/root/')  # Download and automatically unpack  
+    path = file_handler.download('/root/input/')  # Download and automatically unpack  
 
-    context.set_progress(message='This is container 20210818')
-    context.set_progress(message='unpacking sub archives')
+    context.set_progress(message='This is container 20210913')
     context.set_progress(message='path is '+str(path))
 
     zip_files = glob.glob(path+"/*.zip")
-    context.set_progress(message='found ' + str(len(zip_files)) + ' archives')
+    ima_files = glob.glob(path+"/*.IMA")
+
+    context.set_progress(message='found ' + str(len(zip_files)) + ' archives in download path')
+    context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files before unpacking in path')
     for file in zip_files:
         context.set_progress(message='unpacking '+str(file))
-        call(["unzip", file])
+        call(["unzip", '-d', path, file])
+
+
+    ima_files = glob.glob(path+"/*.IMA")
+    context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking')
+
 
     context.set_progress(message='Sorting DICOM data...')
     call([
