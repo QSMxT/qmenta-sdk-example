@@ -21,11 +21,13 @@ def run(context):
     # Get the analysis settings (histogram range of intensities)
     settings = analysis_data['settings']
 
-    # Get a T1 image from the input files
-    file_handler = context.get_files('input')[0]
-    path = file_handler.download('/root/input/')  # Download and automatically unpack  
+    # Get the data from the input files
+    context.set_progress(message='found ' + str(len(context.get_files('input'))) + ' input files')
 
-    context.set_progress(message='This is container 20210913')
+    for file_handler in context.get_files('input'):
+        path = file_handler.download('/root/input/')  # Download and automatically unpack  
+
+    context.set_progress(message='This is container 20210915')
     context.set_progress(message='path is '+str(path))
 
     zip_files = glob.glob(path+"/*.zip")
