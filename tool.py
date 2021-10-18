@@ -27,17 +27,23 @@ def run(context):
     # for file_handler in context.get_files('input'):
     #     path = file_handler.download('/root/input/')  # Download and automatically unpack  
 
-    context.set_progress(message='This is container 20211018')
+    context.set_progress(message='This is container 20211019')
 
     file_handler_0 = context.get_files('input_0')[0]
     path_0 = file_handler_0.download(f'/root/input_0/') # Download and automatically unpack 
     ima_files = glob.glob(f'/root/input_0/*/*.IMA') # two folders, should be 160 .IMA in each  
+    context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking in sub-path')
+    context.set_progress(message='path is '+str(path_0))
+    ima_files = glob.glob(f'/root/input_0/*.IMA') # two folders, should be 160 .IMA in each  
     context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking in path')
     context.set_progress(message='path is '+str(path_0))
 
     file_handler_1 = context.get_files('input_1')[0]
     path_1 = file_handler_1.download(f'/root/input_1/') # Download and automatically unpack 
     ima_files = glob.glob(f'/root/input_1/*/*.IMA') # two folders, should be 160 .IMA in each  
+    context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking in sub-path')
+    context.set_progress(message='path is '+str(path_1))
+    ima_files = glob.glob(f'/root/input_1/*.IMA') # two folders, should be 160 .IMA in each  
     context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking in path')
     context.set_progress(message='path is '+str(path_1))
 
@@ -57,18 +63,25 @@ def run(context):
     #         ima_files = glob.glob(path+"/*/*.IMA")
     #         context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking')
 
-    context.set_progress(message='Sorting mag DICOM data...')
+    # context.set_progress(message='Sorting mag DICOM data...')
+    # call([
+    # "python3",
+    # "/opt/QSMxT/run_0_dicomSort.py",
+    # "/root/input_0/", 
+    # "/00_dicom"
+    # ])
+    # context.set_progress(message='Sorting phase DICOM data...')
+    # call([
+    # "python3",
+    # "/opt/QSMxT/run_0_dicomSort.py",
+    # "/root/input_1/", 
+    # "/00_dicom"
+    # ])
+    context.set_progress(message='Sorting DICOM data...')
     call([
     "python3",
     "/opt/QSMxT/run_0_dicomSort.py",
-    path_0, 
-    "/00_dicom"
-    ])
-    context.set_progress(message='Sorting phase DICOM data...')
-    call([
-    "python3",
-    "/opt/QSMxT/run_0_dicomSort.py",
-    path_1, 
+    "/root/", 
     "/00_dicom"
     ])
 
