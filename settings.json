@@ -9,9 +9,22 @@
     },
     {
         "type": "container",
-        "id": "input",
-        "title": "GRE image",
-        "file_filter": "qsm[2,2]<'T1', [], '\\.*'>",
+        "id": "input_0",
+        "title": "GRE image magnitude",
+        "file_filter": "qsm[1,1]<'T1', [], '\\.*'>",
+        "in_filter": [
+            "mri_brain_data"
+        ],
+        "out_filter": [],
+        "anchor": 1,
+        "mandatory": 1,
+        "batch": 1
+    },
+    {
+        "type": "container",
+        "id": "input_1",
+        "title": "GRE image phase",
+        "file_filter": "qsm[1,1]<'T1', [], '\\.*'>",
         "in_filter": [
             "mri_brain_data"
         ],
