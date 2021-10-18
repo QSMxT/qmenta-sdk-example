@@ -27,12 +27,12 @@ def run(context):
     # for file_handler in context.get_files('input'):
     #     path = file_handler.download('/root/input/')  # Download and automatically unpack  
 
-    context.set_progress(message='This is container 20210927')
+    context.set_progress(message='This is container 211008')
 
     for count, file_handler in enumerate(context.get_files('input')):
         path = file_handler.download(f'/root/input_{count}/') # Download and automatically unpack 
         ima_files = glob.glob(f'/root/input_{count}/.IMA') # two folders, should be 160 .IMA in each  
-        context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking in path')
+        context.set_progress(message='found ' + str(len(ima_files)) + ' .IMA files after unpacking in path')
         context.set_progress(message='path is '+str(path))
 
         if len(ima_files) == 0:
@@ -53,29 +53,6 @@ def run(context):
         ])
 
 
-    # zip_files = glob.glob(path+"/*.zip")
-    # ima_files = glob.glob(path+"/*.IMA")
-
-    # context.set_progress(message='found ' + str(len(zip_files)) + ' archives in download path')
-    # context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files before unpacking in path')
-    # for file in zip_files:
-    #     context.set_progress(message='unpacking '+str(file))
-    #     call(["unzip", '-d', path, file])
-
-
-    # ima_files = glob.glob(path+"/*.IMA")
-    # context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after unpacking')
-
-
-    # context.set_progress(message='Sorting DICOM data...')
-    # call([
-    # "python3",
-    # "/opt/QSMxT/run_0_dicomSort.py",
-    # path, 
-    # "/00_dicom"
-    # ])
-
-
     context.set_progress(message='Converting DICOM data...')
     call([
     "python3",
@@ -92,6 +69,9 @@ def run(context):
     "--qsm_iterations",
     str(qsm_iterations),
     "--two_pass",
+    "--no_resampling",
+    "--masking",
+    "phase-based",
     "/01_bids", 
     "/02_qsm_output"
     ])
