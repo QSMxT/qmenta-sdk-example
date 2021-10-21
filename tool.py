@@ -22,7 +22,7 @@ def run(context):
     # Get the analysis settings (histogram range of intensities)
     settings = analysis_data['settings']
 
-    context.set_progress(message='This is container 20211021')
+    context.set_progress(message='This is container 20211022')
 
     file_handler_0 = context.get_files('input_0')[0]
     path_0 = file_handler_0.download(f'/root/input_0/') 

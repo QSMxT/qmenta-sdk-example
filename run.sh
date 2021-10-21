@@ -1,8 +1,8 @@
 rm -rf analysis_output
 mkdir analysis_output
 
-docker build -t stebo85/qsmxt:211021 -f qsm.Dockerfile .
+docker build -t stebo85/qsmxt:211022 -f qsm.Dockerfile .
 
-python test_tool.py stebo85/qsmxt:211021 example_data analysis_output \
+python test_tool.py stebo85/qsmxt:211022 example_data analysis_output \
     --settings settings.json \
     --values mock_settings_values.json
