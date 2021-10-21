@@ -1,5 +1,5 @@
 # Install the SDK
-FROM vnmd/qsmxt_1.1.6:20210623
+FROM vnmd/qsmxt_1.1.7:latest
 
 WORKDIR /root
 
