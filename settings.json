@@ -1,45 +1,31 @@
 [
     {
         "type": "heading",
-        "content": "QSMxT pipeline"
+        "content": "QSMxT"
     },
     {
         "type": "info",
-        "content": "The following values determine the QSMxT parameters."
+        "content": "QSMxT is a complete and end-to-end QSM processing and analysis framework that excels at automatically reconstructing and processing QSM for large groups of participants<br/>"
     },
     {
         "type": "container",
-        "id": "input_0",
-        "title": "GRE image magnitude",
-        "file_filter": "qsm[1,1]<'T1', [], '\\.*'>",
+        "title": "DICOMs",
+        "id": "dicoms",
+        "mandatory": 1,
+        "file_filter": "(c_mag_and_phs<'SWI', any ['mag_and_phs']> OR (c_mag<'SWI', all ['magnitude']> AND c_phase<'SWI', all ['phase']>))",
         "in_filter": [
             "mri_brain_data"
         ],
         "out_filter": [],
-        "anchor": 1,
-        "mandatory": 1,
-        "batch": 1
+        "batch": 1,
+        "anchor": 1
     },
     {
-        "type": "container",
-        "id": "input_1",
-        "title": "GRE image phase",
-        "file_filter": "qsm[1,1]<'T1', [], '\\.*'>",
-        "in_filter": [
-            "mri_brain_data"
-        ],
-        "out_filter": [],
-        "anchor": 1,
+        "type": "single_choice",
+        "title": "Premade pipeline",
+        "id": "premade",
         "mandatory": 1,
-        "batch": 1
-    },
-    {
-        "type": "decimal",
-        "title": "TGV QSM Iterations",
-        "id":"qsm_iterations",
-        "mandatory":1,
-        "default":1000,
-        "min":1,
-        "max":2000
+        "default": "gre",
+        "options":[["gre", "3D Gradient-Echo (GRE)"], ["epi", "3D Echo-Planar Imaging (EPI) - brain only"], ["bet", "BET (BET pipeline - brain only)"], ["fast", "Fast pipeline (brain only)"], ["body", "Body imaging"], ["nextqsm", "NeXtQSM (deep learning QSM)"]]
     }
 ]

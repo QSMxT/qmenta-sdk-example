@@ -1,86 +1,85 @@
-import matplotlib
+#!/usr/bin/env python
 
-# This backend config avoids $DISPLAY errors in headless machines
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pdfkit
-import subprocess
-from subprocess import call
-from time import gmtime, strftime
-from tornado import template
+import os
 import glob
+import subprocess
 
+def sys_cmd(cmd, print_output=True, print_command=True):
+    if print_command:
+        print(cmd)
+    
+    process = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    exit_code = process.returncode
+    std_out = process.stdout.decode('UTF-8')[:-1]
+    std_err = process.stderr.decode('UTF-8')[:-1]
+    
+    if print_output:
+        print(std_out, end="")
+    
+    return std_out, std_err, exit_code
 
-# AnalysisContext documentation: https://docs.qmenta.com/sdk/sdk.html
 def run(context):
+    """
+    Function invoked by the SDK that passes a context object. This object can then be used
+    to communicate with the platform in the context of that particular analysis to fetch files,
+    report progress, and upload results, among others.
+
+    Parameters
+    ----------
+    context : qmenta.sdk.context.AnalysisContext
+        Analysis context object to communicate with the QMENTA Platform.
+    """
     
-    # Get the analysis information dictionary (patient id, analysis name...)
-    analysis_data = context.fetch_analysis_data()
+    # Define directories for the input and output files inside the container
+    context.set_progress(value=0, message="Finding input directories...")
+    input_dir = os.path.join(os.path.expanduser("~"), "local_exec_input")
+    output_dir = os.path.join(os.path.expanduser("~"), "local_exec_output")
+    work_dir = os.path.join(os.path.expanduser("~"), "local_exec_resources")
 
-    # Get the analysis settings (histogram range of intensities)
-    settings = analysis_data['settings']
+    # Retrieve settings
+    settings = context.get_settings()
+    premade = settings.get('premade')
 
-    context.set_progress(message='This is container 20211022')
+    with open(os.path.join(work_dir, "qsm", "full_output.log"), 'w') as outfile:
+        try:
+            # QMENTA: Prepare input files
+            context.set_progress(value=0, message="Preparing input files...")
+            for f in context.get_files("dicoms"): f.download(input_dir)
 
-    file_handler_0 = context.get_files('input_0')[0]
-    path_0 = file_handler_0.download(f'/root/input_0/') 
+            # QSMxT: Sort DICOMS
+            context.set_progress(value=1, message="Sorting DICOMs...")
+            std_out, std_err, exit_code = sys_cmd(f"run_0_dicomSort.py {input_dir} {os.path.join(work_dir, 'dicoms-sorted')}")
+            outfile.write(std_out)
+            if exit_code != 0:
+                outfile.write(std_err)
+                raise RuntimeError(f"Error {exit_code} while sorting DICOMS!")
+            
+            # QSMxT: Convert to BIDS
+            context.set_progress(value=5, message="Converting to BIDS...")
+            std_out, std_err, exit_code = sys_cmd(f"run_1_dicomConvert.py {os.path.join(work_dir, 'dicoms-sorted')} {os.path.join(work_dir, 'bids')} --auto_yes")
+            outfile.write(std_out)
+            if exit_code != 0:
+                outfile.write(std_err)
+                raise RuntimeError(f"Error {exit_code} while sorting DICOMS!")
 
-    file_handler_1 = context.get_files('input_1')[0]
-    path_1 = file_handler_1.download(f'/root/input_1/')
+            # QSMxT: QSM pipeline
+            context.set_progress(value=10, message="Running QSM pipeline...")
+            std_out, std_err, exit_code = sys_cmd(f"run_2_qsm.py {os.path.join(work_dir, 'bids')} {os.path.join(work_dir, 'qsm')} --premade {premade} --auto_yes")
+            outfile.write(std_out)
+            if exit_code != 0:
+                outfile.write(std_err)
+                raise RuntimeError(f"Error {exit_code} while sorting DICOMS!")
+
+            # QMENTA: Upload results
+            context.set_progress(value=95, message="Uploading results")
+            qsm_files = glob.glob(os.path.join(work_dir, "qsm", "qsm_final", "*", "*"))
+            for qsm_file in qsm_files:
+                context.upload_file(qsm_file, os.path.split(qsm_file)[1], modality="QSM")
+            for f in glob.glob(os.path.join(work_dir, 'qsm', '*.*')):
+                context.upload_file(f, os.path.split(f)[1])
+        except Exception as e:
+            context.set_progress(value=0, message=str(e))
+            outfile.write(str(e))
+            raise e
 
 
-    context.set_progress(message='Sorting DICOM data...')
-    call([
-    "python3",
-    "/opt/QSMxT/run_0_dicomSort.py",
-    "/root/", 
-    "/00_dicom"
-    ])
-
-    ima_files = glob.glob("/00_dicom/**/*.IMA", recursive=True)
-    context.set_progress(message='found ' + str(len(ima_files)) + ' ima_files after Sorting DICOM data in /00_dicom')
-
-
-    context.set_progress(message='Converting DICOM data...')
-    try:
-        retcode = call([
-            "python3",
-            "/opt/QSMxT/run_1_dicomToBids.py",
-            "/00_dicom/", 
-            "/01_bids"
-            ])
-        if retcode < 0:
-            context.set_progress(message="Converting DICOM data was terminated by signal" + str(retcode))
-        else:
-            context.set_progress(message="Converting DICOM data returned " + str(retcode))
-    except OSError as e:
-       context.set_progress(message="Converting DICOM data failed:" + e)
-
-    nii_files = glob.glob("/01_bids/**/*.nii.gz", recursive=True)
-    context.set_progress(message='found ' + str(len(nii_files)) + ' nii_files after Converting DICOM data in /01_bids')
-
-
-    qsm_iterations = int(settings['qsm_iterations'])
-    context.set_progress(message='Run QSM pipeline ...')
-    
-    CompletedProcess = subprocess.run([
-        "python3",
-        "/opt/QSMxT/run_2_qsm.py",
-        "--qsm_iterations",
-        str(qsm_iterations),
-        "--two_pass",
-        "/01_bids", 
-        "/02_qsm_output"
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
-    context.set_progress(message='QSM pipeline stdout: ' + CompletedProcess.stdout)
-    context.set_progress(message='QSM pipeline stderr: ' + CompletedProcess.stderr)
-
-    output_file = glob.glob("/02_qsm_output/qsm_final/_run_run-1/*.nii")
-    context.set_progress(message='outputfile is ... ' + output_file[0])
-
-    # Upload the results
-    context.set_progress(message='Uploading results...')
-
-    context.upload_file(output_file[0], 'final.nii')

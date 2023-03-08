@@ -1,12 +1,8 @@
 {
-    "input_0": [
+    "dicoms": [
         {
-            "path": "mag.zip"
-        }],
-    "input_1": [
-        {
-            "path": "phs.zip"
+            "path": "dicoms.zip"
         }
     ],
-    "qsm_iterations": 1
+    "premade": "fast"
 }
